@@ -1,26 +1,35 @@
-import React, { useState } from 'react';
-import { Link, useHistory } from 'react-router-dom'
-
+import React, { useState, useCallback, useContext } from 'react';
+import { Link, useHistory, Redirect } from 'react-router-dom'
+import {AuthContext} from '../../context/AuthContext'
 import { FiLogIn } from 'react-icons/fi'
 
 
 import './styles.css'
+import { auth } from '../../services/firebase';
 
 const Logon = () => {
-   const [nome, setNome] = useState('');
-   const [congregacao, setCongregacao] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const history = useHistory();
 
-    const handleLogin = (e) => {
+    const handleLogin = useCallback(async (e) => {
         e.preventDefault();
 
-                   
-            localStorage.setItem('nome', nome);
-            localStorage.setItem('congregacao', congregacao);
+        try {
+            await auth.signInWithEmailAndPassword(email, password);
+            history.push('/');
+        } catch (error) {
+            console.log(error);
+        }
 
-            history.push('/regioes');
 
-    } 
+    }, [email, history, password]);
+
+    const {user} = useContext(AuthContext);
+
+    if(user){
+        return <Redirect to="/"/>
+    }
 
     return (
         <div className="logon-container">
@@ -29,17 +38,19 @@ const Logon = () => {
                     <h1>Faça seu login</h1>
 
                     <input
-                        placeholder="Seu Nome"
-                        value={nome}
-                        onChange={e => setNome(e.target.value)}
+                        placeholder="Seu Email"
+                        value={email}
+                        type="email"
+                        onChange={e => setEmail(e.target.value)}
                     />
 
                     <input
-                        placeholder="Sua Congregação"
-                        value={congregacao}
-                        onChange={e => setCongregacao(e.target.value)}
+                        placeholder="Sua Senha"
+                        value={password}
+                        type="password"
+                        onChange={e => setPassword(e.target.value)}
                     />
-                    
+
                     <button className="button" type="submit">Entrar</button>
 
                     <Link className="back-link" to="/register">

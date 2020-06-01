@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useHistory } from 'react-router-dom'
 import { FiPower } from 'react-icons/fi';
-import { firebaseConfig } from '../../services/firebase'
+import {firestore, auth } from '../../services/firebase'
 import './styles.css'
 
-const firestore = firebaseConfig.firestore();
 
 const Regioes = () => {
     const [regioes, setRegioes] = useState([]);
@@ -27,9 +26,15 @@ const Regioes = () => {
         history.push('/tarjeta', {regiao: regiao, regioes: regioes})
     } 
 
-    const handleLogout = () => {
-        localStorage.clear();
-        history.push('/')
+    const handleLogout = async () => {
+
+        try{
+            await auth.signOut();
+            localStorage.clear();
+            history.push('/Logon')
+        }
+        catch(e){console.log("Não foi possível deslogar")}
+
     }
 
     return (

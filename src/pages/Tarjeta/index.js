@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useHistory } from 'react-router-dom'
 import { FiPower, FiTrash2 } from 'react-icons/fi';
-import { firebaseConfig } from '../../services/firebase'
+import { firestore } from '../../services/firebase'
 import './styles.css'
-
-const firestore = firebaseConfig.firestore();
 
 
 const Tarjeta = props => {
@@ -32,7 +30,7 @@ const Tarjeta = props => {
 
     const handleLogout = () => {
         localStorage.clear();
-        history.push('/')
+        history.push('/Logon')
     }
 
     const handleDeleteIncident = id => console.log(id)

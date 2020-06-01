@@ -1,12 +1,15 @@
 import React from 'react';
-import Routes from './routes'
-import './global.css'
+import Routes from './routes';
+import './global.css';
+import { AuthProvider } from './context/AuthContext'
 
 
 const App = () => {
-  
+
   return (
-   <Routes />
+    <AuthProvider>
+      <Routes />
+    </AuthProvider>
   );
 }
 
