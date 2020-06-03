@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useHistory } from 'react-router-dom'
 import { FiPower, FiTrash2 } from 'react-icons/fi';
-import { firestore } from '../../services/firebase'
+import { firestore } from '../Firebase'
 import './styles.css'
 
 

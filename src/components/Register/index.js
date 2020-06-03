@@ -1,6 +1,6 @@
 import React, {useCallback} from 'react';
 import {useHistory} from 'react-router-dom';
-import {auth} from '../../services/firebase';
+import {auth} from '../Firebase';
 
 const Cadastrar  = () => {
     const history = useHistory();
