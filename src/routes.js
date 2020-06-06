@@ -4,6 +4,7 @@ import {PrivateRoute} from './components/PrivateRoute'
 
 //Componentes
 import Direction from './components/Direction';
+import PwForget from './components/PwForget'
 import General from './components/General';
 import Logon from './components/Logon';
 import Register from './components/Register';
@@ -23,6 +24,7 @@ const Routes = () => {
         <Switch>
             <Route path="/logon" exact component={Logon}/>
             <Route path="/register" exact component={Register}/>
+            <Route path="/pwforgot" exact component={PwForget}/>
             
             <PrivateRoute path="/profile" exact component={Profile}/>
 

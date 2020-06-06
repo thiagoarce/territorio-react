@@ -38,7 +38,8 @@ const Cadastrar = () => {
             })
             .then(() => history.push("/"))
             .catch(error => {
-                error.message = erros[error.code]
+                if(erros[error.code]){
+                error.message = erros[error.code]}
                 setError(error)
             })
 
