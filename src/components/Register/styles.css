@@ -1,0 +1,38 @@
+.register-container{
+    width: 100%;
+    max-width: 1120px;
+    height: 80vh;
+    margin: 0 auto;
+    padding: 0 30px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.register-container section.form{
+    width: 100%;
+    max-width: 350px;
+    margin-right: 30px;
+}
+
+.register-container section.form form{
+    margin-top: 100px;
+}
+
+.register-container section.form form .divisor{
+    margin-bottom: 10%;
+}
+
+
+.register-container section.form form h1{
+    font-size: 32px;
+    margin-bottom: 32px;
+}
+
+.register-container section.form form p{
+    text-align: center;
+    font-weight: bold;
+    color: red;
+    margin: 10px;
+}

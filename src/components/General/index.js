@@ -1,12 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { useHistory } from 'react-router-dom'
-import {firestore } from '../Firebase'
-import './styles.css'
+import React, { useState, useEffect, useContext } from 'react';
+import { useHistory } from 'react-router-dom';
+import { firestore } from '../Firebase';
+import { AuthContext } from '../Firebase/authContext'
+import './styles.css';
 
 
 const Regioes = () => {
     const [regioes, setRegioes] = useState([]);
     const history = useHistory();
+    const {user} = useContext(AuthContext);
+
+    console.log(user)
 
     useEffect(() => {
         
@@ -26,7 +30,7 @@ const Regioes = () => {
         <>
         <div className="regioes-container">
             <header>
-                <span>Bem vindo, </span>
+                <span>Olá, {user.displayName}</span>
             </header>
 
             <h1>Regiões disponíveis</h1>

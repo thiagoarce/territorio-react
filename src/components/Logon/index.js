@@ -58,6 +58,10 @@ const Logon = () => {
                         <FiLogIn size={16} color="#E02041" />
                         Não tenho cadastro
                     </Link>
+                    <Link className="back-link" to="/register">
+                        <FiLogIn size={16} color="#E02041" />
+                        Esqueci minha senha
+                    </Link>
                 </form>
             </section>
         </div>

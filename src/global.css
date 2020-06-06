@@ -14,7 +14,7 @@ body{
     -webkit-font-smoothing: antialised;
 }
 
-input, button, textarea {
+input, select, button, textarea {
     font: 400 18px Roboto, sans-serif;
 }
 
@@ -22,7 +22,7 @@ button{
     cursor: pointer;
 }
 
-form input{
+form input, select{
     width: 100%;
     height: 60px;
     color: #333;
@@ -61,6 +61,10 @@ form textarea{
 
 .button:hover{
     filter: brightness(90%);
+}
+
+.button:disabled{
+    background: #a09f9f;
 }
 
 .back-link{
