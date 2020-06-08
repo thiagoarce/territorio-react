@@ -1,11 +1,8 @@
 import React, { useState, useCallback, useContext } from 'react';
-import { useHistory, Redirect } from 'react-router-dom'
-import {AuthContext} from '../Firebase/authContext'
+import { Link, useHistory, Redirect } from 'react-router-dom'
+import { AuthContext } from '../Firebase/authContext'
 import { erros } from '../../constants/erros'
-import './styles.css'
-
-
-import './styles.css'
+import { FiArrowLeft } from 'react-icons/fi'
 import { auth } from '../Firebase';
 
 const PwForget = () => {
@@ -21,24 +18,28 @@ const PwForget = () => {
             alert("Um email com um link de recuperação de senha foi enviado para sua caixa de entrada")
             history.push('/');
         } catch (error) {
-            console.log(error)
-            if(erros[error.code]){
-                error.message = erros[error.code]}
+            if (erros[error.code]) {
+                error.message = erros[error.code]
+            }
             setError(error);
         }
 
 
     }, [email, history]);
 
-    const {user} = useContext(AuthContext);
+    const { user } = useContext(AuthContext);
 
-    if(user){
-        return <Redirect to="/"/>
+    if (user) {
+        return <Redirect to="/" />
     }
 
     return (
         <div className="container">
+
             <section className="form">
+                <Link className="back-link" to="/logon">
+                    <FiArrowLeft size={32} color="#E02041" />
+                </Link>
                 <form onSubmit={handleLogin}>
                     <h1>Recuperar Senha</h1>
 

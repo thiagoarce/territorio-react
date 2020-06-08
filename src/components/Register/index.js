@@ -1,8 +1,8 @@
 import React, { useCallback, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import  { Firebase, auth, firestore } from '../Firebase';
+import { FiArrowLeft } from 'react-icons/fi'
 import { erros } from '../../constants/erros'
-import './styles.css'
 
 const Cadastrar = () => {
     const [displayName, setdisplayName] = useState('');
@@ -46,8 +46,11 @@ const Cadastrar = () => {
     }, [congregation, displayName, email, history, increment, passwordOne]);
 
     return (
-        <div className="register-container">
+        <div className="container">
             <section className="form">
+                <Link className="back-link" to="/logon">
+                    <FiArrowLeft size={32} color="#E02041" />
+                </Link>
                 <form onSubmit={handleCadastro}>
                     <h1>Faça seu Cadastro</h1>
 

@@ -10,7 +10,7 @@ import Logon from './components/Logon';
 import Register from './components/Register';
 import Profile from './components/Profile';
 import NewDireccion from './components/NewDireccion';
-import MyTerritory from './components/MyTerritory';
+import Home from './components/Home';
 import Assign from './components/Assign'
 import Publishers from './components/Publishers'
 import Approvals from './components/Approvals'
@@ -28,7 +28,7 @@ const Routes = () => {
             
             <PrivateRoute path="/profile" exact component={Profile}/>
 
-            <PrivateRoute path="/" exact component={MyTerritory}/>
+            <PrivateRoute path="/" exact component={Home}/>
             <PrivateRoute path="/new" exact component={NewDireccion}/>
             <PrivateRoute path="/assign" exact component={Assign}/>
             <PrivateRoute path="/publishers" exact component={Publishers}/>

@@ -1,16 +1,14 @@
 import React, { useState, useCallback, useContext } from 'react';
-import { Link, useHistory, Redirect } from 'react-router-dom'
-import {AuthContext} from '../Firebase/authContext'
-import { FiLogIn } from 'react-icons/fi'
-import './styles.css'
-
-
-import './styles.css'
+import { Link, useHistory, Redirect } from 'react-router-dom';
+import {AuthContext} from '../Firebase/authContext';
+import { erros } from '../../constants/erros';
+import { FiLogIn} from 'react-icons/fi';
 import { auth } from '../Firebase';
 
 const Logon = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState(null);
     const history = useHistory();
 
     const handleLogin = useCallback(async (e) => {
@@ -20,20 +18,23 @@ const Logon = () => {
             await auth.signInWithEmailAndPassword(email, password);
             history.push('/');
         } catch (error) {
-            console.log(error);
+            if (erros[error.code]) {
+                error.message = erros[error.code]
+            }
+            setError(error);
         }
 
 
     }, [email, history, password]);
 
-    const {user} = useContext(AuthContext);
+    const [user] = useContext(AuthContext);
 
     if(user){
         return <Redirect to="/"/>
     }
 
     return (
-        <div className="logon-container">
+        <div className="container">
             <section className="form">
                 <form onSubmit={handleLogin}>
                     <h1>Faça seu login</h1>
@@ -53,6 +54,8 @@ const Logon = () => {
                     />
 
                     <button className="button" type="submit">Entrar</button>
+
+                    {error && <p>{error.message}</p>}
 
                     <Link className="back-link" to="/register">
                         <FiLogIn size={16} color="#E02041" />

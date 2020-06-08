@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
+import {locations} from '../../constants/locations'
 
 //Imports do Firebase
 import { auth } from '../Firebase'
@@ -24,8 +25,16 @@ export default function Nav() {
     const classes = useStyles();
     const [openDrawer, setOpenDrawer] = useState(false);
     const [anchorMenu, setAnchorMenu] = useState(null);
+    const [pageName, setPageName] = useState("Meus Territórios")
     const openMenu = Boolean(anchorMenu);
     const history = useHistory();
+
+    let location = useLocation();
+
+    useEffect(() => {
+
+    setPageName(locations[location.pathname]);
+    }, [location.pathname])
 
     const handleMenu = (event) => {
         setAnchorMenu(event.currentTarget);
@@ -36,6 +45,7 @@ export default function Nav() {
     };
 
     const goToProfile = () => {
+        setPageName("Meu Perfil")
         history.push('/profile');
         setAnchorMenu(null);
     };
@@ -87,7 +97,7 @@ export default function Nav() {
                                 <MenuIcon />
                             </IconButton>
                             <Typography variant="h6" className={classes.title}>
-                                Photos
+                                {pageName}
                             </Typography>
 
                             <div>

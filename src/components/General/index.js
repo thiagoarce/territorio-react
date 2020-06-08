@@ -8,9 +8,8 @@ import './styles.css';
 const Regioes = () => {
     const [regioes, setRegioes] = useState([]);
     const history = useHistory();
-    const {user} = useContext(AuthContext);
+    const [user] = useContext(AuthContext);
 
-    console.log(user)
 
     useEffect(() => {
         
@@ -18,7 +17,6 @@ const Regioes = () => {
         .then(response => response.data())
         .then(response => Object.keys(response).map(regiao => ({id: regiao, nome: response[regiao].nome, vizinhanca: response[regiao].nearby})))
         .then(response => setRegioes(response))
-        .then(console.log("Regiões carregadas"))
         
     }, [])
 

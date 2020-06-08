@@ -5,7 +5,7 @@ import Nav from '../Navigation'
 
 export const PrivateRoute = props => {
     const {component: RouteComponent, ...other} = props;
-    const {user} = useContext(AuthContext);
+    const [user] = useContext(AuthContext);
 
     return(
         <Route

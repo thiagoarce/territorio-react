@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Link, useHistory } from 'react-router-dom'
 import { FiPower, FiTrash2 } from 'react-icons/fi';
 import { firestore } from '../Firebase'
+import { AuthContext } from '../Firebase/authContext'
 import './styles.css'
 
 
 const Tarjeta = props => {
+    const [user] = useContext(AuthContext);
     const [enderecos, setEnderecos] = useState([]);
     const { regiaoId, regiaoNome } = props.location.state.regiao;
 
     const history = useHistory();
 
-    const userName = localStorage.getItem('nome');
-    const userCong = localStorage.getItem('congregacao');
+    const userName = user.displayName;
+    const userCong = user.congregation;
 
     useEffect(() => {
         const today = new Date();

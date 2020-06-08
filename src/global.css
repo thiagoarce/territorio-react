@@ -76,6 +76,7 @@ form textarea{
     text-decoration: none;
     font-weight: 500;
     transition: opacity 0.2s;
+    border: 0;
 }
 
 .back-link svg {
@@ -86,3 +87,46 @@ form textarea{
     opacity: 0.8;
 }
 
+.container{
+    width: 100%;
+    max-width: 1120px;
+    height: 100vh;
+    margin: 0 auto;
+    padding: 0 30px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.container section.form{
+    width: 100%;
+    max-width: 350px;
+    margin-right: 30px;
+}
+
+.container section.form form{
+    margin-top: 100px
+}
+
+.container section.form form .divisor{
+    margin-bottom: 10%
+}
+
+.container section.form form h1{
+    font-size: 32px;
+    margin-bottom: 32px;
+}
+
+.container section.form form p{
+    text-align: center;
+    font-weight: bold;
+    color: red;
+    margin: 10px;
+}
+
+@media(max-width: 500px){
+    .container{
+        display: grid
+    }
+}
