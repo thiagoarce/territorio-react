@@ -1,118 +1,126 @@
 import React, { useCallback, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import  { Firebase, auth, firestore } from '../../services/Firebase';
-import { FiArrowLeft } from 'react-icons/fi'
-import { erros } from '../../constants/erros'
+import { Firebase, auth, firestore } from '../../services/Firebase';
+import { FiArrowLeft } from 'react-icons/fi';
+import { erros } from '../../constants/erros';
 
 const Cadastrar = () => {
-    const [displayName, setdisplayName] = useState('');
-    const [congregation, setCongregation] = useState('Espanhol');
-    const [email, setEmail] = useState('');
-    const [passwordOne, setPasswordOne] = useState('');
-    const [passwordTwo, setPasswordTwo] = useState('');
-    const [error, setError] = useState(null);
-    const role = ''
-    const history = useHistory();
+  const [displayName, setdisplayName] = useState('');
+  const [congregation, setCongregation] = useState('Espanhol');
+  const [email, setEmail] = useState('');
+  const [passwordOne, setPasswordOne] = useState('');
+  const [passwordTwo, setPasswordTwo] = useState('');
+  const [error, setError] = useState(null);
+  const role = '';
+  const history = useHistory();
 
-    const increment = Firebase.firestore.FieldValue.increment(1)
+  const increment = Firebase.firestore.FieldValue.increment(1);
 
+  const isInvalid =
+    passwordOne !== passwordTwo ||
+    passwordOne === '' ||
+    email === '' ||
+    displayName === '';
 
-    const isInvalid =
-        passwordOne !== passwordTwo ||
-        passwordOne === '' ||
-        email === '' ||
-        displayName === '';
+  const handleCadastro = useCallback(
+    e => {
+      e.preventDefault();
 
-    const handleCadastro = useCallback(e => {
-        e.preventDefault();
+      auth
+        .createUserWithEmailAndPassword(email, passwordOne)
+        .then(authUser => {
+          const userRef = firestore.doc(`users/${authUser.user.uid}`);
+          const userStateRef = firestore.doc('users/state');
 
-        auth.createUserWithEmailAndPassword(email, passwordOne)
-            .then(authUser => {
-                const userRef = firestore.doc(`users/${authUser.user.uid}`);
-                const userStateRef = firestore.doc("users/state");
+          const batch = firestore.batch();
+          batch.set(userRef, { displayName, congregation, email, role });
+          batch.update(userStateRef, {
+            users: increment,
+            [congregation]: increment,
+          });
+          batch.commit();
+        })
+        .then(() => history.push('/'))
+        .catch(error => {
+          if (erros[error.code]) {
+            error.message = erros[error.code];
+          }
+          setError(error);
+        });
+    },
+    [congregation, displayName, email, history, increment, passwordOne],
+  );
 
-                const batch = firestore.batch();
-                batch.set(userRef, { displayName, congregation, email, role });
-                batch.update(userStateRef, {users: increment, [congregation]: increment });
-                batch.commit();
-            })
-            .then(() => history.push("/"))
-            .catch(error => {
-                if(erros[error.code]){
-                error.message = erros[error.code]}
-                setError(error)
-            })
+  return (
+    <div className="container">
+      <section className="form">
+        <Link className="back-link" to="/logon">
+          <FiArrowLeft size={32} color="#E02041" />
+        </Link>
+        <form onSubmit={handleCadastro}>
+          <h1>Faça seu Cadastro</h1>
 
-    }, [congregation, displayName, email, history, increment, passwordOne]);
+          <input
+            placeholder="Seu Nome"
+            value={displayName}
+            onChange={e => {
+              setdisplayName(e.target.value);
+              setError(null);
+            }}
+          />
 
-    return (
-        <div className="container">
-            <section className="form">
-                <Link className="back-link" to="/logon">
-                    <FiArrowLeft size={32} color="#E02041" />
-                </Link>
-                <form onSubmit={handleCadastro}>
-                    <h1>Faça seu Cadastro</h1>
+          <input
+            className="divisor"
+            placeholder="Seu Email"
+            value={email}
+            type="email"
+            onChange={e => {
+              setEmail(e.target.value);
+              setError(null);
+            }}
+          />
 
+          <input
+            placeholder="Sua Senha"
+            value={passwordOne}
+            type="password"
+            onChange={e => {
+              setPasswordOne(e.target.value);
+              setError(null);
+            }}
+          />
 
-                    <input
-                        placeholder="Seu Nome"
-                        value={displayName}
-                        onChange={e => {
-                            setdisplayName(e.target.value);
-                            setError(null);
-                        }}
-                    />
+          <input
+            className="divisor"
+            placeholder="Confirme Sua Senha"
+            value={passwordTwo}
+            type="password"
+            onChange={e => {
+              setPasswordTwo(e.target.value);
+              setError(null);
+            }}
+          />
 
-                    <input
-                        className="divisor"
-                        placeholder="Seu Email"
-                        value={email}
-                        type="email"
-                        onChange={e => {
-                            setEmail(e.target.value);
-                            setError(null);
-                        }}
-                    />
+          <select
+            value={congregation}
+            onChange={e => {
+              setCongregation(e.target.value);
+              setError(null);
+            }}
+          >
+            <option value="Espanhol">Congregação Espanhola</option>
+            <option value="Guarani">Congregação Guarani</option>
+          </select>
 
-                    <input
-                        placeholder="Sua Senha"
-                        value={passwordOne}
-                        type="password"
-                        onChange={e => {
-                            setPasswordOne(e.target.value);
-                            setError(null);
-                        }}
-                    />
+          <button disabled={isInvalid} className="button" type="submit">
+            Entrar
+          </button>
 
-                    <input
-                        className="divisor"
-                        placeholder="Confirme Sua Senha"
-                        value={passwordTwo}
-                        type="password"
-                        onChange={e => {
-                            setPasswordTwo(e.target.value);
-                            setError(null);
-                        }}
-                    />
-
-                    <select
-                        value={congregation}
-                        onChange={e => {
-                            setCongregation(e.target.value);
-                            setError(null);
-                        }}>
-                        <option value="Espanhol">Congregação Espanhola</option>
-                        <option value="Guarani">Congregação Guarani</option>
-                    </select>
-
-                    <button disabled={isInvalid} className="button" type="submit">Entrar</button>
-
-                    {error && <p>{error.message}</p>}
-                </form>
-            </section>
-        </div>
-    )
-}
+          {error && <p>{error.message}</p>}
+        </form>
+      </section>
+    </div>
+  );
+};
 
 export default Cadastrar;

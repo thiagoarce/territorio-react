@@ -1,6 +1,6 @@
-import firebase from "firebase/app";
-import "firebase/auth";
-import "firebase/firestore";
+import firebase from 'firebase/app';
+import 'firebase/auth';
+import 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_API_KEY,
@@ -14,14 +14,15 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-firebase.firestore().enablePersistence()
-  .catch(function(err) {
-      if (err.code === 'unimplemented') {
-          console.log("Esse navegador não permite funcionalidades offline")
-      }
+firebase
+  .firestore()
+  .enablePersistence()
+  .catch(function (err) {
+    if (err.code === 'unimplemented') {
+      console.log('Esse navegador não permite funcionalidades offline');
+    }
   });
 
-export const Firebase = firebase
+export const Firebase = firebase;
 export const auth = firebase.auth();
 export const firestore = firebase.firestore();
-
