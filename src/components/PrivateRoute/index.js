@@ -1,6 +1,6 @@
 import React, {useContext} from 'react';
 import {Route, Redirect } from 'react-router-dom';
-import { AuthContext } from '../Firebase/authContext'
+import { AuthContext } from '../../services/Firebase/authContext'
 import Nav from '../Navigation'
 
 export const PrivateRoute = props => {

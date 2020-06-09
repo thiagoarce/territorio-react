@@ -3,18 +3,18 @@ import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import {PrivateRoute} from './components/PrivateRoute'
 
 //Componentes
-import Direction from './components/Direction';
-import PwForget from './components/PwForget'
-import General from './components/General';
-import Logon from './components/Logon';
-import Register from './components/Register';
-import Profile from './components/Profile';
-import NewDireccion from './components/NewDireccion';
-import Home from './components/Home';
-import Assign from './components/Assign'
-import Publishers from './components/Publishers'
-import Approvals from './components/Approvals'
-import Reports from './components/Reports'
+import Direction from './pages/Direction';
+import PwForget from './pages/PwForget'
+import General from './pages/General';
+import Logon from './pages/Logon';
+import Register from './pages/Register';
+import Profile from './pages/Profile';
+import NewDireccion from './pages/NewDireccion';
+import Home from './pages/Home';
+import Assign from './pages/Assign'
+import Publishers from './pages/Publishers'
+import Approvals from './pages/Approvals'
+import Reports from './pages/Reports'
 
 
 const Routes = () => {

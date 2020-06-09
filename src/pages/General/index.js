@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useHistory } from 'react-router-dom';
-import { firestore } from '../Firebase';
-import { AuthContext } from '../Firebase/authContext'
+import { firestore } from '../../services/Firebase';
+import { AuthContext } from '../../services/Firebase/authContext'
+import { trackPromise } from 'react-promise-tracker';
 import './styles.css';
 
 
@@ -12,11 +13,11 @@ const Regioes = () => {
 
 
     useEffect(() => {
-        
+        trackPromise(
         firestore.collection('estado').doc('regioes').get()
         .then(response => response.data())
         .then(response => Object.keys(response).map(regiao => ({id: regiao, nome: response[regiao].nome, vizinhanca: response[regiao].nearby})))
-        .then(response => setRegioes(response))
+        .then(response => setRegioes(response)))
         
     }, [])
 

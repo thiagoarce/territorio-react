@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import  { Firebase, auth, firestore } from '../Firebase';
+import  { Firebase, auth, firestore } from '../../services/Firebase';
 import { FiArrowLeft } from 'react-icons/fi'
 import { erros } from '../../constants/erros'
 

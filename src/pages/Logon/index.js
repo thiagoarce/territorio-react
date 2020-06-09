@@ -1,9 +1,10 @@
 import React, { useState, useCallback, useContext } from 'react';
 import { Link, useHistory, Redirect } from 'react-router-dom';
-import {AuthContext} from '../Firebase/authContext';
+import {AuthContext} from '../../services/Firebase/authContext';
 import { erros } from '../../constants/erros';
 import { FiLogIn} from 'react-icons/fi';
-import { auth } from '../Firebase';
+import { auth } from '../../services/Firebase';
+
 
 const Logon = () => {
     const [email, setEmail] = useState('');

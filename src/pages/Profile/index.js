@@ -1,6 +1,6 @@
 import React, { useState, useContext, useCallback } from 'react';
-import { firestore, auth } from '../Firebase';
-import { AuthContext } from '../Firebase/authContext'
+import { firestore, auth } from '../../services/Firebase';
+import { AuthContext } from '../../services/Firebase/authContext'
 import { erros } from '../../constants/erros'
 
 const Profile = () => {

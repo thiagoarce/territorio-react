@@ -1,5 +1,5 @@
 import React, {useContext} from 'react';
-import {AuthContext} from '../Firebase/authContext'
+import {AuthContext} from '../../services/Firebase/authContext'
 
 
 const Home = () => {

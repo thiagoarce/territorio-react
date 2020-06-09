@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Link, useHistory } from 'react-router-dom'
-import { FiPower, FiTrash2 } from 'react-icons/fi';
-import { firestore } from '../Firebase'
-import { AuthContext } from '../Firebase/authContext'
+import { FiTrash2 } from 'react-icons/fi';
+import { firestore } from '../../services/Firebase'
+import { AuthContext } from '../../services/Firebase/authContext'
 import './styles.css'
 
 
@@ -11,7 +10,6 @@ const Tarjeta = props => {
     const [enderecos, setEnderecos] = useState([]);
     const { regiaoId, regiaoNome } = props.location.state.regiao;
 
-    const history = useHistory();
 
     const userName = user.displayName;
     const userCong = user.congregation;
@@ -30,10 +28,6 @@ const Tarjeta = props => {
 
     }, [regiaoId, userCong])
 
-    const handleLogout = () => {
-        localStorage.clear();
-        history.push('/Logon')
-    }
 
     const handleDeleteIncident = id => console.log(id)
     return (
@@ -41,10 +35,6 @@ const Tarjeta = props => {
         <div className="tarjeta-container">
             <header>
                 <span>Bem vindo, {userName}</span>
-                <Link className="button" to="endereco/new" >Cadastrar novo endereco</Link>
-                <button onClick={handleLogout} type="button">
-                    <FiPower size={18} color="#E02041" />
-                </button>
             </header>
 
             <h1>Endereços na região {regiaoNome}</h1>

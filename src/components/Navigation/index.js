@@ -3,7 +3,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import {locations} from '../../constants/locations'
 
 //Imports do Firebase
-import { auth } from '../Firebase'
+import { auth } from '../../services/Firebase'
 
 //Imports do MaterialUI
 import {
