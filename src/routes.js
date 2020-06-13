@@ -8,7 +8,7 @@ import PwForget from './pages/PwForget';
 import General from './pages/General';
 import Logon from './pages/Logon';
 import Register from './pages/Register';
-import Profile from './pages/Profile';
+import Account from './pages/Account';
 import NewDireccion from './pages/NewDireccion';
 import Home from './pages/Home';
 import Assign from './pages/Assign';
@@ -24,7 +24,7 @@ const Routes = () => {
         <Route path="/register" exact component={Register} />
         <Route path="/pwforgot" exact component={PwForget} />
 
-        <PrivateRoute path="/profile" exact component={Profile} />
+        <PrivateRoute path="/account" exact component={Account} />
 
         <PrivateRoute path="/" exact component={Home} />
         <PrivateRoute path="/new" exact component={NewDireccion} />

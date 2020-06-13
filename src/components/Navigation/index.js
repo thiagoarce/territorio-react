@@ -6,28 +6,26 @@ import { locations } from '../../constants/locations';
 import { auth } from '../../services/Firebase';
 
 //Imports do MaterialUI
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  IconButton,
-  SwipeableDrawer,
-  Menu,
-  List,
-  Divider,
-  MenuItem,
-} from '@material-ui/core';
-import {
-  Menu as MenuIcon,
-  Public as WorldIcon,
-  Create as CreateIcon,
-  BusinessCenter as BagIcon,
-  AssignmentInd as AssignIcon,
-  Assessment as ReportIcon,
-  PlaylistAddCheck as PlaylistAddCheckIcon,
-  AccountCircle,
-  PermContactCalendar as PeopleIcon,
-} from '@material-ui/icons';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
+import IconButton from '@material-ui/core/IconButton';
+import SwipeableDrawer from '@material-ui/core/SwipeableDrawer';
+import Menu from '@material-ui/core/Menu';
+import List from '@material-ui/core/List';
+import Divider from '@material-ui/core/Divider';
+import MenuItem from '@material-ui/core/MenuItem';
+
+import MenuIcon from '@material-ui/icons/Menu';
+import WorldIcon from '@material-ui/icons/Public';
+import CreateIcon from '@material-ui/icons/Create';
+import BagIcon from '@material-ui/icons/BusinessCenter';
+import AssignIcon from '@material-ui/icons/AssignmentInd';
+import ReportIcon from '@material-ui/icons/Assessment';
+import PlaylistAddCheckIcon from '@material-ui/icons/PlaylistAddCheck';
+import PeopleIcon from '@material-ui/icons/PermContactCalendar';
+import AccountCircle from '@material-ui/icons/AccountCircle';
+
 import { useStyles } from './styles';
 import { ListItemLink } from './ListItemLink';
 
@@ -53,9 +51,9 @@ export default function Nav() {
     setAnchorMenu(null);
   };
 
-  const goToProfile = () => {
+  const goToAccount = () => {
     setPageName('Meu Perfil');
-    history.push('/profile');
+    history.push('/account');
     setAnchorMenu(null);
   };
 
@@ -160,7 +158,7 @@ export default function Nav() {
                   open={openMenu}
                   onClose={handleClose}
                 >
-                  <MenuItem onClick={goToProfile}>Meu Perfil</MenuItem>
+                  <MenuItem onClick={goToAccount}>Meu Perfil</MenuItem>
                   <MenuItem onClick={handleLogout}>Sair</MenuItem>
                 </Menu>
               </div>

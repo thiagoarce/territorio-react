@@ -1,5 +1,5 @@
 export const locations = {
-  '/profile': 'Meu Perfil',
+  '/account': 'Meu Perfil',
   '/': 'Meus territórios',
   '/new': 'Cadastrar novo endereço',
   '/assign': 'Designar Cartões',

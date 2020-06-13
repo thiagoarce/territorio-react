@@ -1,17 +1,16 @@
 import React, { useState, useContext, useCallback } from 'react';
 import { firestore, auth } from '../../services/Firebase';
 import { AuthContext } from '../../services/Firebase/authContext';
+import { toast } from 'react-toastify';
 import { erros } from '../../constants/erros';
 
-const Profile = () => {
+const Account = () => {
   const [user, setUser] = useContext(AuthContext);
   const [displayName, setdisplayName] = useState(user.displayName);
   const [congregation, setCongregation] = useState(user.congregation);
   const email = user.email;
   const [passwordOne, setPasswordOne] = useState('');
   const [passwordTwo, setPasswordTwo] = useState('');
-  const [errorData, setErrorData] = useState(null);
-  const [errorPw, setErrorPw] = useState(null);
   const role = user.role;
 
   const isDataInvalid = displayName === '';
@@ -26,12 +25,12 @@ const Profile = () => {
         .doc(`users/${user.uid}`)
         .update({ displayName, congregation })
         .then(() => setUser({ ...user, displayName, congregation }))
-        .then(() => alert('Dados alterados com sucesso!'))
+        .then(() => toast.success('✅ Dados alterados com sucesso!'))
         .catch(error => {
           if (erros[error.code]) {
             error.message = erros[error.code];
           }
-          setErrorData(error);
+          toast.error(`❌ ${error.message}`);
         });
     },
     [congregation, displayName, setUser, user],
@@ -44,7 +43,7 @@ const Profile = () => {
       auth.currentUser
         .updatePassword(passwordOne)
         .then(() => {
-          alert('Senha alterada com sucesso');
+          toast.success('✅ Senha alterada com sucesso');
           setPasswordOne('');
           setPasswordTwo('');
         })
@@ -53,7 +52,9 @@ const Profile = () => {
             console.log(error);
             error.message = erros[error.code];
           }
-          setErrorPw(error);
+          toast.error(`❌ ${error.message}`);
+          setPasswordOne('');
+          setPasswordTwo('');
         });
     },
     [passwordOne],
@@ -77,18 +78,12 @@ const Profile = () => {
           <input
             placeholder="Digite seu nome"
             value={displayName}
-            onChange={e => {
-              setdisplayName(e.target.value);
-              setErrorData(null);
-            }}
+            onChange={e => setdisplayName(e.target.value)}
           />
 
           <select
             value={congregation}
-            onChange={e => {
-              setCongregation(e.target.value);
-              setErrorData(null);
-            }}
+            onChange={e => setCongregation(e.target.value)}
           >
             <option value="Espanhol">Congregação Espanhola</option>
             <option value="Guarani">Congregação Guarani</option>
@@ -97,8 +92,6 @@ const Profile = () => {
           <button disabled={isDataInvalid} className="button" type="submit">
             Alterar
           </button>
-
-          {errorData && <p>{errorData.message}</p>}
         </form>
       </section>
       <section className="form">
@@ -109,30 +102,22 @@ const Profile = () => {
             placeholder="Digite sua nova senha"
             value={passwordOne}
             type="password"
-            onChange={e => {
-              setPasswordOne(e.target.value);
-              setErrorPw(null);
-            }}
+            onChange={e => setPasswordOne(e.target.value)}
           />
           <input
             placeholder="Confirme sua nova senha"
             value={passwordTwo}
             type="password"
-            onChange={e => {
-              setPasswordTwo(e.target.value);
-              setErrorPw(null);
-            }}
+            onChange={e => setPasswordTwo(e.target.value)}
           />
 
           <button disabled={isPwInvalid} className="button" type="submit">
             Alterar
           </button>
-
-          {errorPw && <p>{errorPw.message}</p>}
         </form>
       </section>
     </div>
   );
 };
 
-export default Profile;
+export default Account;

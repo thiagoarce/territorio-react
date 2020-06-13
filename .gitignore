@@ -27,3 +27,9 @@ yarn-error.log*
 .firebase
 .firebaserc
 firebase.json
+debug.log
+.eslintignore
+.eslintrc.json
+.editorConfig
+prettier.config.js
+/.vscode

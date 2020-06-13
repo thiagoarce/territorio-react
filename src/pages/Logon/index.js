@@ -9,6 +9,7 @@ const Logon = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
+  const [user] = useContext(AuthContext);
   const history = useHistory();
 
   const handleLogin = useCallback(
@@ -28,9 +29,8 @@ const Logon = () => {
     [email, history, password],
   );
 
-  const [user] = useContext(AuthContext);
-
   if (user) {
+    console.log('redirecionado');
     return <Redirect to="/" />;
   }
 

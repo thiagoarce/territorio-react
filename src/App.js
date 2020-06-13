@@ -1,35 +1,18 @@
 import React from 'react';
 import Routes from './routes';
-import './global.css';
 import { AuthProvider } from './services/Firebase/authContext';
-import Loader from 'react-loader-spinner';
-import { usePromiseTracker } from 'react-promise-tracker';
+import LoadingIndicator from './components/LoadingIndicator';
+import Toast from './components/Toast';
 
-const LoadingIndicator = props => {
-  const { promiseInProgress } = usePromiseTracker();
-
-  return (
-    promiseInProgress && (
-      <div
-        style={{
-          width: '100%',
-          height: '100',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <Loader type="ThreeDots" color="#2BAD60" height="100" width="100" />
-      </div>
-    )
-  );
-};
+import 'react-toastify/dist/ReactToastify.css';
+import './global.css';
 
 const App = () => {
   return (
     <AuthProvider>
       <Routes />
       <LoadingIndicator />
+      <Toast />
     </AuthProvider>
   );
 };
