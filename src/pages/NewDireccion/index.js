@@ -1,4 +1,4 @@
-import React, { useState, useContext, useCallback } from 'react';
+import React, { useState, useContext, useCallback, useEffect } from 'react';
 import { AuthContext } from '../../services/Firebase/authContext';
 import { firestore, Firebase } from '../../services/Firebase';
 import axios from 'axios';
@@ -9,6 +9,8 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import { toast } from 'react-toastify';
+import { Map, TileLayer, Marker } from 'react-leaflet';
+
 import Autocomplete, {
   createFilterOptions,
 } from '@material-ui/lab/Autocomplete';
@@ -57,6 +59,9 @@ const NewDireccion = () => {
   const [ruas, setRuas] = useState(logradouros[0].ruas);
   const [onlyContato, setOnlyContato] = useState(false);
   const [reset, setReset] = useState('');
+  const [initialPosition, setInitialPosition] = useState([0, 0]);
+  const [selectedPosition, setSelectedPosition] = useState([0, 0]);
+  const [showMap, setShowMap] = useState(false);
 
   const [user] = useContext(AuthContext);
 
@@ -69,6 +74,51 @@ const NewDireccion = () => {
     tempTelefono ||
     email;
 
+  // Get Current Position
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        setInitialPosition([
+          position.coords.latitude,
+          position.coords.longitude,
+        ]);
+      },
+      () => {
+        setInitialPosition([-20.4810437, -54.7756201]);
+      },
+      {
+        timeout: 30000,
+        enableHighAccuracy: true,
+      },
+    );
+  }, []);
+
+  const handleMapClick = useCallback(async event => {
+    setSelectedPosition([event.latlng.lat, event.latlng.lng]);
+    setLatitude(Math.round(event.latlng.lat * 10000000) / 10000000);
+    setLongitude(Math.round(event.latlng.lng * 10000000) / 10000000);
+
+    try {
+      const response = await axios.get(
+        'https://maps.googleapis.com/maps/api/geocode/json',
+        {
+          params: {
+            latlng: `${event.latlng.lat}, ${event.latlng.lng}`,
+            key: process.env.REACT_APP_API_KEY,
+          },
+        },
+      );
+      if (response.data.status === 'OK') {
+        setNumero(response.data.results[0].address_components[0].short_name);
+        setRua(response.data.results[0].address_components[1].long_name);
+        setBarrio(response.data.results[0].address_components[2].short_name);
+      }
+    } catch (error) {
+      toast.error('❌ Não foi possível obter os dados');
+      console.log(error);
+    }
+  }, []);
+
   const getDireccionPosition = useCallback(
     async e => {
       try {
@@ -76,7 +126,7 @@ const NewDireccion = () => {
           'https://maps.googleapis.com/maps/api/geocode/json',
           {
             params: {
-              address: rua,
+              address: `${rua}, ${numero}, ${cidade}`,
               key: process.env.REACT_APP_API_KEY,
             },
           },
@@ -84,7 +134,9 @@ const NewDireccion = () => {
         if (response.data.status === 'OK') {
           const responseBarrio = response.data.results[
             '0'
-          ].address_components.filter(e => e.types.includes('sublocality'));
+          ].address_components.filter(comp =>
+            comp.types.includes('sublocality'),
+          );
           if (responseBarrio['0']) {
             setBarrio(responseBarrio['0'].short_name);
           }
@@ -108,32 +160,50 @@ const NewDireccion = () => {
         console.log(error);
       }
     },
-    [rua],
+    [rua, numero, cidade],
   );
 
-  const getActualPosition = () => {
-    if (navigator && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        position => {
-          setLatitude(
-            Math.round(position.coords.latitude * 10000000) / 10000000,
+  const getActualPosition = useCallback(e => {
+    navigator.geolocation.getCurrentPosition(
+      async position => {
+        setLatitude(Math.round(position.coords.latitude * 10000000) / 10000000);
+        setLongitude(
+          Math.round(position.coords.longitude * 10000000) / 10000000,
+        );
+
+        try {
+          const response = await axios.get(
+            'https://maps.googleapis.com/maps/api/geocode/json',
+            {
+              params: {
+                latlng: `${position.coords.latitude}, ${position.coords.longitude}`,
+                key: process.env.REACT_APP_API_KEY,
+              },
+            },
           );
-          setLongitude(
-            Math.round(position.coords.longitude * 10000000) / 10000000,
-          );
-        },
-        () => {
+          if (response.data.status === 'OK') {
+            setNumero(
+              response.data.results[0].address_components[0].short_name,
+            );
+            setRua(response.data.results[0].address_components[1].long_name);
+            setBarrio(
+              response.data.results[0].address_components[2].short_name,
+            );
+          }
+        } catch (error) {
           toast.error('❌ Não foi possível obter os dados');
-        },
-        {
-          timeout: 30000,
-          enableHighAccuracy: true,
-        },
-      );
-    } else {
-      toast.error('❌ Geolocalização não suportada');
-    }
-  };
+          console.log(error);
+        }
+      },
+      () => {
+        toast.error('❌ Não foi possível obter os dados');
+      },
+      {
+        timeout: 30000,
+        enableHighAccuracy: true,
+      },
+    );
+  }, []);
 
   const handleSubmit = useCallback(
     e => {
@@ -221,18 +291,49 @@ const NewDireccion = () => {
             </Typography>
           </Grid>
           <Grid item xs={4}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={onlyContato}
-                  onChange={(e, value) => setOnlyContato(value)}
-                  name="contatocheck"
-                  color="primary"
+            <Grid container>
+              <Grid item xs={12}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={onlyContato}
+                      onChange={(e, value) => {
+                        setOnlyContato(value);
+                      }}
+                      name="contatocheck"
+                      color="primary"
+                    />
+                  }
+                  label="Apenas Telefone ou Email"
                 />
-              }
-              label="Apenas Telefone ou Email"
-            />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={showMap}
+                      onChange={(e, value) => setShowMap(value)}
+                      name="contatocheck"
+                      color="primary"
+                    />
+                  }
+                  label="Escolher local em um mapa"
+                />
+              </Grid>
+            </Grid>
           </Grid>
+          {!onlyContato && showMap && (
+            <Grid item xs={12}>
+              <Map center={initialPosition} zoom={15} onClick={handleMapClick}>
+                <TileLayer
+                  attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <Marker position={selectedPosition} />
+              </Map>
+            </Grid>
+          )}
+
           {!onlyContato && (
             <Grid item xs={12}>
               <fieldset className={classes.fieldGroup}>
@@ -240,10 +341,10 @@ const NewDireccion = () => {
                 <Grid container spacing={2} justify="flex-end">
                   <Grid item xs={12} md={6}>
                     <Autocomplete
+                      inputValue={rua}
                       key={reset}
+                      clea
                       freeSolo
-                      autoComplete
-                      autoSelect
                       filterOptions={filterOptions}
                       className={classes.input}
                       options={ruas}
@@ -372,7 +473,7 @@ const NewDireccion = () => {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Autocomplete
-                    value={nacionalidade}
+                    key={reset}
                     className={classes.input}
                     options={nacionalidades}
                     onChange={(event, value) => setNacionalidade(value)}
