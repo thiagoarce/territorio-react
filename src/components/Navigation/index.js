@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { locations } from '../../constants/locations';
+import { AuthContext } from '../../services/Firebase/authContext';
 
 //Imports do Firebase
 import { auth } from '../../services/Firebase';
@@ -30,6 +31,7 @@ import { useStyles } from './styles';
 import { ListItemLink } from './ListItemLink';
 
 export default function Nav() {
+  const [user] = useContext(AuthContext);
   const classes = useStyles();
   const [openDrawer, setOpenDrawer] = useState(false);
   const [anchorMenu, setAnchorMenu] = useState(null);
@@ -80,37 +82,45 @@ export default function Nav() {
           icon={<CreateIcon />}
         />
       </List>
-      <Divider />
-      <List>
-        <ListItemLink
-          to="/assign"
-          primary="Designar território"
-          icon={<AssignIcon />}
-        />
-      </List>
-      <Divider />
-      <List>
-        <ListItemLink
-          to="/publishers"
-          primary="Publicadores"
-          icon={<PeopleIcon />}
-        />
-        <ListItemLink
-          to="/general"
-          primary="Todas as regiões"
-          icon={<WorldIcon />}
-        />
-        <ListItemLink
-          to="/approvals"
-          primary="Aprovar Alterações"
-          icon={<PlaylistAddCheckIcon />}
-        />
-        <ListItemLink
-          to="/reports"
-          primary="Relatórios"
-          icon={<ReportIcon />}
-        />
-      </List>
+      {(user.role === 'dir' || user.role === 'admin') && (
+        <>
+          <Divider />
+          <List>
+            <ListItemLink
+              to="/assign"
+              primary="Designar território"
+              icon={<AssignIcon />}
+            />
+          </List>
+        </>
+      )}
+      {user.role === 'admin' && (
+        <>
+          <Divider />
+          <List>
+            <ListItemLink
+              to="/publishers"
+              primary="Publicadores"
+              icon={<PeopleIcon />}
+            />
+            <ListItemLink
+              to="/general"
+              primary="Todas as regiões"
+              icon={<WorldIcon />}
+            />
+            <ListItemLink
+              to="/approvals"
+              primary="Aprovar Alterações"
+              icon={<PlaylistAddCheckIcon />}
+            />
+            <ListItemLink
+              to="/reports"
+              primary="Relatórios"
+              icon={<ReportIcon />}
+            />
+          </List>
+        </>
+      )}
     </div>
   );
 

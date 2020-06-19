@@ -1,17 +1,19 @@
 import React, { useState, useContext, useCallback } from 'react';
-import { firestore, auth } from '../../services/Firebase';
+import { auth } from '../../services/Firebase';
 import { AuthContext } from '../../services/Firebase/authContext';
 import { toast } from 'react-toastify';
 import { erros } from '../../constants/erros';
 
 const Account = () => {
   const [user, setUser] = useContext(AuthContext);
-  const [displayName, setdisplayName] = useState(user.displayName);
-  const [congregation, setCongregation] = useState(user.congregation);
+  const congregation = user.congregation;
   const email = user.email;
+  const role = user.role;
+  const uid = user.uid;
+
+  const [displayName, setdisplayName] = useState(user.displayName);
   const [passwordOne, setPasswordOne] = useState('');
   const [passwordTwo, setPasswordTwo] = useState('');
-  const role = user.role;
 
   const isDataInvalid = displayName === '';
 
@@ -21,19 +23,26 @@ const Account = () => {
     e => {
       e.preventDefault();
 
-      firestore
-        .doc(`users/${user.uid}`)
-        .update({ displayName, congregation })
-        .then(() => setUser({ ...user, displayName, congregation }))
-        .then(() => toast.success('✅ Dados alterados com sucesso!'))
-        .catch(error => {
-          if (erros[error.code]) {
-            error.message = erros[error.code];
-          }
-          toast.error(`❌ ${error.message}`);
+      const userData = {
+        displayName,
+        congregation,
+        role,
+      };
+      try {
+        auth.currentUser.updateProfile({
+          displayName: JSON.stringify(userData),
         });
+
+        setUser({ ...userData, uid, email });
+        toast.success('✅ Nome alterado com sucesso');
+      } catch (error) {
+        if (erros[error.code]) {
+          error.message = erros[error.code];
+        }
+        toast.error(`❌ ${error.message}`);
+      }
     },
-    [congregation, displayName, setUser, user],
+    [congregation, displayName, role, email, setUser, uid],
   );
 
   const handleChangePw = useCallback(
@@ -64,7 +73,7 @@ const Account = () => {
     <div className="container">
       <section className="form">
         <form onSubmit={handleChangeData}>
-          <h1>Alterar meus dados</h1>
+          <h1>Meus dados</h1>
 
           <input
             placeholder="Seu Email"
@@ -73,7 +82,12 @@ const Account = () => {
             disabled={true}
           />
 
-          <p>Habilitado como {role ? role : 'Publicador'}</p>
+          <p>{congregation ? congregation : null}</p>
+          <p>
+            {congregation
+              ? `Habilitado como ${role}`
+              : 'Seu Cadastro ainda não foi aprovado, contate o Administrador'}
+          </p>
 
           <input
             placeholder="Digite seu nome"
@@ -81,16 +95,8 @@ const Account = () => {
             onChange={e => setdisplayName(e.target.value)}
           />
 
-          <select
-            value={congregation}
-            onChange={e => setCongregation(e.target.value)}
-          >
-            <option value="Espanhol">Congregação Espanhola</option>
-            <option value="Guarani">Congregação Guarani</option>
-          </select>
-
           <button disabled={isDataInvalid} className="button" type="submit">
-            Alterar
+            Alterar Nome de Exibição
           </button>
         </form>
       </section>

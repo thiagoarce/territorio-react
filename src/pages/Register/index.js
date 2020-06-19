@@ -1,20 +1,16 @@
 import React, { useCallback, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { Firebase, auth, firestore } from '../../services/Firebase';
+import { auth } from '../../services/Firebase';
 import { FiArrowLeft } from 'react-icons/fi';
+import { toast } from 'react-toastify';
 import { erros } from '../../constants/erros';
 
 const Cadastrar = () => {
   const [displayName, setdisplayName] = useState('');
-  const [congregation, setCongregation] = useState('Espanhol');
   const [email, setEmail] = useState('');
   const [passwordOne, setPasswordOne] = useState('');
   const [passwordTwo, setPasswordTwo] = useState('');
-  const [error, setError] = useState(null);
-  const role = '';
   const history = useHistory();
-
-  const increment = Firebase.firestore.FieldValue.increment(1);
 
   const isInvalid =
     passwordOne !== passwordTwo ||
@@ -23,32 +19,32 @@ const Cadastrar = () => {
     displayName === '';
 
   const handleCadastro = useCallback(
-    e => {
+    async e => {
       e.preventDefault();
 
-      auth
-        .createUserWithEmailAndPassword(email, passwordOne)
-        .then(authUser => {
-          const userRef = firestore.doc(`users/${authUser.user.uid}`);
-          const userStateRef = firestore.doc('users/state');
+      const userData = {
+        displayName: displayName,
+        congregation: 'pend',
+        role: 'pub',
+      };
 
-          const batch = firestore.batch();
-          batch.set(userRef, { displayName, congregation, email, role });
-          batch.update(userStateRef, {
-            users: increment,
-            [congregation]: increment,
-          });
-          batch.commit();
-        })
-        .then(() => history.push('/'))
-        .catch(error => {
-          if (erros[error.code]) {
-            error.message = erros[error.code];
-          }
-          setError(error);
+      try {
+        await auth.createUserWithEmailAndPassword(email, passwordOne);
+        await auth.currentUser.updateProfile({
+          displayName: JSON.stringify(userData),
         });
+
+        toast.success('✅ Usuário adicionado com sucesso');
+        await auth.signOut();
+        history.push('/');
+      } catch (error) {
+        if (erros[error.code]) {
+          error.message = erros[error.code];
+        }
+        toast.error(`❌ ${error.message}`);
+      }
     },
-    [congregation, displayName, email, history, increment, passwordOne],
+    [displayName, email, history, passwordOne],
   );
 
   return (
@@ -63,10 +59,7 @@ const Cadastrar = () => {
           <input
             placeholder="Seu Nome"
             value={displayName}
-            onChange={e => {
-              setdisplayName(e.target.value);
-              setError(null);
-            }}
+            onChange={e => setdisplayName(e.target.value)}
           />
 
           <input
@@ -74,49 +67,26 @@ const Cadastrar = () => {
             placeholder="Seu Email"
             value={email}
             type="email"
-            onChange={e => {
-              setEmail(e.target.value);
-              setError(null);
-            }}
+            onChange={e => setEmail(e.target.value)}
           />
 
           <input
             placeholder="Sua Senha"
             value={passwordOne}
             type="password"
-            onChange={e => {
-              setPasswordOne(e.target.value);
-              setError(null);
-            }}
+            onChange={e => setPasswordOne(e.target.value)}
           />
 
           <input
-            className="divisor"
             placeholder="Confirme Sua Senha"
             value={passwordTwo}
             type="password"
-            onChange={e => {
-              setPasswordTwo(e.target.value);
-              setError(null);
-            }}
+            onChange={e => setPasswordTwo(e.target.value)}
           />
-
-          <select
-            value={congregation}
-            onChange={e => {
-              setCongregation(e.target.value);
-              setError(null);
-            }}
-          >
-            <option value="Espanhol">Congregação Espanhola</option>
-            <option value="Guarani">Congregação Guarani</option>
-          </select>
 
           <button disabled={isInvalid} className="button" type="submit">
             Entrar
           </button>
-
-          {error && <p>{error.message}</p>}
         </form>
       </section>
     </div>

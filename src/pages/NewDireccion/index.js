@@ -43,7 +43,7 @@ const filterOptions = createFilterOptions({
 });
 
 const NewDireccion = () => {
-  const [rua, setRua] = useState('');
+  const [calle, setCalle] = useState('');
   const [numero, setNumero] = useState('');
   const [referencia, setReferencia] = useState('');
   const [cidade, setCidade] = useState(logradouros[0].nome);
@@ -65,10 +65,10 @@ const NewDireccion = () => {
 
   const [user] = useContext(AuthContext);
 
-  const isLocationValid = !rua;
+  const isLocationValid = !calle;
 
   const isInfoValid =
-    (rua && latitude && longitude) ||
+    (calle && latitude && longitude) ||
     (referencia && latitude && longitude) ||
     telefono ||
     tempTelefono ||
@@ -84,7 +84,7 @@ const NewDireccion = () => {
         ]);
       },
       () => {
-        setInitialPosition([-20.4810437, -54.7756201]);
+        setInitialPosition([-20.459421, -54.6364654]);
       },
       {
         timeout: 30000,
@@ -95,9 +95,8 @@ const NewDireccion = () => {
 
   const handleMapClick = useCallback(async event => {
     setSelectedPosition([event.latlng.lat, event.latlng.lng]);
-    setLatitude(Math.round(event.latlng.lat * 10000000) / 10000000);
-    setLongitude(Math.round(event.latlng.lng * 10000000) / 10000000);
-
+    setLatitude(event.latlng.lat.toFixed(5));
+    setLongitude(event.latlng.lng.toFixed(5));
     try {
       const response = await axios.get(
         'https://maps.googleapis.com/maps/api/geocode/json',
@@ -110,7 +109,7 @@ const NewDireccion = () => {
       );
       if (response.data.status === 'OK') {
         setNumero(response.data.results[0].address_components[0].short_name);
-        setRua(response.data.results[0].address_components[1].long_name);
+        setCalle(response.data.results[0].address_components[1].long_name);
         setBarrio(response.data.results[0].address_components[2].short_name);
       }
     } catch (error) {
@@ -126,7 +125,7 @@ const NewDireccion = () => {
           'https://maps.googleapis.com/maps/api/geocode/json',
           {
             params: {
-              address: `${rua}, ${numero}, ${cidade}`,
+              address: `${calle}, ${numero}, ${cidade}`,
               key: process.env.REACT_APP_API_KEY,
             },
           },
@@ -142,15 +141,11 @@ const NewDireccion = () => {
           }
 
           setLatitude(
-            Math.round(
-              response.data.results['0'].geometry.location.lat * 10000000,
-            ) / 10000000,
+            response.data.results['0'].geometry.location.lat.toFixed(5),
           );
 
           setLongitude(
-            Math.round(
-              response.data.results['0'].geometry.location.lng * 10000000,
-            ) / 10000000,
+            response.data.results['0'].geometry.location.lng.toFixed(5),
           );
         } else {
           toast.error('❌ Não foi possível obter os dados');
@@ -160,16 +155,14 @@ const NewDireccion = () => {
         console.log(error);
       }
     },
-    [rua, numero, cidade],
+    [calle, numero, cidade],
   );
 
   const getActualPosition = useCallback(e => {
     navigator.geolocation.getCurrentPosition(
       async position => {
-        setLatitude(Math.round(position.coords.latitude * 10000000) / 10000000);
-        setLongitude(
-          Math.round(position.coords.longitude * 10000000) / 10000000,
-        );
+        setLatitude(position.coords.latitude.toFixed(5));
+        setLongitude(position.coords.longitude.toFixed(5));
 
         try {
           const response = await axios.get(
@@ -185,7 +178,7 @@ const NewDireccion = () => {
             setNumero(
               response.data.results[0].address_components[0].short_name,
             );
-            setRua(response.data.results[0].address_components[1].long_name);
+            setCalle(response.data.results[0].address_components[1].long_name);
             setBarrio(
               response.data.results[0].address_components[2].short_name,
             );
@@ -231,12 +224,16 @@ const NewDireccion = () => {
         });
       } else {
         const coordenadas = latitude
-          ? new Firebase.firestore.GeoPoint(latitude, longitude)
+          ? new Firebase.firestore.GeoPoint(
+              parseFloat(latitude),
+              parseFloat(longitude),
+            )
           : null;
 
         firestore.collection('changes').add({
           type: 'add',
-          direccion: rua,
+          rua: calle,
+          numero,
           referencia,
           barrio,
           email,
@@ -248,7 +245,7 @@ const NewDireccion = () => {
         });
       }
 
-      setRua('');
+      setCalle('');
       setNumero('');
       setReferencia('');
       setLatitude('');
@@ -266,7 +263,8 @@ const NewDireccion = () => {
     },
     [
       barrio,
-      rua,
+      calle,
+      numero,
       idioma,
       email,
       latitude,
@@ -341,15 +339,14 @@ const NewDireccion = () => {
                 <Grid container spacing={2} justify="flex-end">
                   <Grid item xs={12} md={6}>
                     <Autocomplete
-                      inputValue={rua}
+                      inputValue={calle}
                       key={reset}
-                      clea
                       freeSolo
                       filterOptions={filterOptions}
                       className={classes.input}
                       options={ruas}
-                      onChange={(event, value) => setRua(value)}
-                      onInputChange={(event, value) => setRua(value)}
+                      onChange={(event, value) => setCalle(value)}
+                      onInputChange={(event, value) => setCalle(value)}
                       renderInput={params => (
                         <TextField {...params} label="Rua" variant="outlined" />
                       )}

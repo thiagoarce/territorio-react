@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useContext } from 'react';
 import { Link, useHistory, Redirect } from 'react-router-dom';
 import { AuthContext } from '../../services/Firebase/authContext';
+import { toast } from 'react-toastify';
 import { erros } from '../../constants/erros';
 import { FiLogIn } from 'react-icons/fi';
 import { auth } from '../../services/Firebase';
@@ -8,7 +9,6 @@ import { auth } from '../../services/Firebase';
 const Logon = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(null);
   const [user] = useContext(AuthContext);
   const history = useHistory();
 
@@ -23,7 +23,7 @@ const Logon = () => {
         if (erros[error.code]) {
           error.message = erros[error.code];
         }
-        setError(error);
+        toast.error(`❌ ${error.message}`);
       }
     },
     [email, history, password],
@@ -57,8 +57,6 @@ const Logon = () => {
           <button className="button" type="submit">
             Entrar
           </button>
-
-          {error && <p>{error.message}</p>}
 
           <Link className="back-link" to="/register">
             <FiLogIn size={16} color="#E02041" />
