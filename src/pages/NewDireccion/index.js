@@ -34,7 +34,7 @@ const useStyles = makeStyles(theme => ({
   },
 
   fieldGroup: {
-    padding: '20px',
+    padding: theme.spacing(1),
   },
 }));
 

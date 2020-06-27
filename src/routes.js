@@ -3,7 +3,7 @@ import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { PrivateRoute } from './components/PrivateRoute';
 
 //Componentes
-import Direction from './pages/Direction';
+import Tarjeta from './pages/Tarjeta';
 import PwForget from './pages/PwForget';
 import General from './pages/General';
 import Logon from './pages/Logon';
@@ -34,7 +34,7 @@ const Routes = () => {
         <PrivateRoute path="/approvals" exact component={Approvals} />
         <PrivateRoute path="/reports" exact component={Reports} />
 
-        <PrivateRoute path="/tarjeta" exact component={Direction} />
+        <PrivateRoute path="/tarjeta" exact component={Tarjeta} />
       </Switch>
     </BrowserRouter>
   );
