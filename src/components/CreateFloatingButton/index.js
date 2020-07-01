@@ -2,6 +2,7 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Fab from '@material-ui/core/Fab';
 import CreateIcon from '@material-ui/icons/Create';
+import { useHistory } from 'react-router-dom';
 
 const useStyles = makeStyles(theme => ({
   margin: {
@@ -18,9 +19,19 @@ const useStyles = makeStyles(theme => ({
 
 const CreateFloatingButton = () => {
   const classes = useStyles();
+  const history = useHistory(0);
+
+  const handleClick = () => {
+    history.push('/new');
+  };
 
   return (
-    <Fab variant="extended" color="secondary" className={classes.margin}>
+    <Fab
+      variant="extended"
+      color="secondary"
+      className={classes.margin}
+      onClick={handleClick}
+    >
       <CreateIcon className={classes.extendedIcon} />
       Cadastrar Novo Endereço
     </Fab>

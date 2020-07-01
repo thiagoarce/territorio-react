@@ -3,6 +3,8 @@ import { auth } from '../../services/Firebase';
 import { AuthContext } from '../../services/Firebase/authContext';
 import { toast } from 'react-toastify';
 import { erros } from '../../constants/erros';
+import { trackPromise } from 'react-promise-tracker';
+import { congregacoes, roles } from '../../constants/userConfig';
 
 const Account = () => {
   const [user, setUser] = useContext(AuthContext);
@@ -29,9 +31,11 @@ const Account = () => {
         role,
       };
       try {
-        auth.currentUser.updateProfile({
-          displayName: JSON.stringify(userData),
-        });
+        trackPromise(
+          auth.currentUser.updateProfile({
+            displayName: JSON.stringify(userData),
+          }),
+        );
 
         setUser({ ...userData, uid, email });
         toast.success('✅ Nome alterado com sucesso');
@@ -49,22 +53,24 @@ const Account = () => {
     e => {
       e.preventDefault();
 
-      auth.currentUser
-        .updatePassword(passwordOne)
-        .then(() => {
-          toast.success('✅ Senha alterada com sucesso');
-          setPasswordOne('');
-          setPasswordTwo('');
-        })
-        .catch(error => {
-          if (erros[error.code]) {
-            console.log(error);
-            error.message = erros[error.code];
-          }
-          toast.error(`❌ ${error.message}`);
-          setPasswordOne('');
-          setPasswordTwo('');
-        });
+      trackPromise(
+        auth.currentUser
+          .updatePassword(passwordOne)
+          .then(() => {
+            toast.success('✅ Senha alterada com sucesso');
+            setPasswordOne('');
+            setPasswordTwo('');
+          })
+          .catch(error => {
+            if (erros[error.code]) {
+              console.log(error);
+              error.message = erros[error.code];
+            }
+            toast.error(`❌ ${error.message}`);
+            setPasswordOne('');
+            setPasswordTwo('');
+          }),
+      );
     },
     [passwordOne],
   );
@@ -82,10 +88,10 @@ const Account = () => {
             disabled={true}
           />
 
-          <p>{congregation ? congregation : null}</p>
+          <p>{congregation ? congregacoes[congregation] : null}</p>
           <p>
             {congregation
-              ? `Habilitado como ${role}`
+              ? `Habilitado como ${roles[role]}`
               : 'Seu Cadastro ainda não foi aprovado, contate o Administrador'}
           </p>
 

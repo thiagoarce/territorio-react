@@ -4,6 +4,7 @@ import { auth } from '../../services/Firebase';
 import { FiArrowLeft } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { erros } from '../../constants/erros';
+import { trackPromise } from 'react-promise-tracker';
 
 const Cadastrar = () => {
   const [displayName, setdisplayName] = useState('');
@@ -29,10 +30,14 @@ const Cadastrar = () => {
       };
 
       try {
-        await auth.createUserWithEmailAndPassword(email, passwordOne);
-        await auth.currentUser.updateProfile({
-          displayName: JSON.stringify(userData),
-        });
+        await trackPromise(
+          auth.createUserWithEmailAndPassword(email, passwordOne),
+        );
+        await trackPromise(
+          auth.currentUser.updateProfile({
+            displayName: JSON.stringify(userData),
+          }),
+        );
 
         toast.success('✅ Usuário adicionado com sucesso');
         await auth.signOut();

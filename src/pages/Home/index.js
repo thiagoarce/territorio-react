@@ -42,7 +42,7 @@ const Home = () => {
           .then(data => setCartoes(data)),
       );
     }
-  }, [cartoes, setCartoes, user]);
+  }, [cartoes.length, setCartoes, user]);
 
   const atualizaCartoes = useCallback(() => {
     console.log('chamada');
@@ -64,7 +64,7 @@ const Home = () => {
     <Container className={classes.root}>
       <Grid container spacing={3}>
         <Grid item xs={10}>
-          <h3>Bem Vind,</h3>
+          <h3>Bem Vindo,</h3>
           <h1>{user.displayName}</h1>
         </Grid>
         <Grid item xs={2}>
@@ -75,7 +75,14 @@ const Home = () => {
             <SyncIcon fontSize="large" />
           </IconButton>
         </Grid>
-
+        {user.congregation === 'pend' && (
+          <Grid item xs={12}>
+            <h2>
+              Seu cadastro se encontra pendente. Solicite a um admnistrador para
+              designar sua congregação.
+            </h2>
+          </Grid>
+        )}
         {cartoes.length !== 0 && (
           <Grid item xs={12}>
             <h2>Estes são os cartões designados para você:</h2>
