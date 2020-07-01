@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import CardContent from '@material-ui/core/CardContent';
@@ -12,7 +12,15 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import PhoneIcon from '@material-ui/icons/Phone';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
-import { PhoneDialog, DoneDialog, PublicadorDialog } from './Dialogs';
+import { firestore } from '../../services/Firebase';
+import { toast } from 'react-toastify';
+import { CardsContext } from '../../services/Contexto/cardsContext';
+import {
+  PhoneDialog,
+  DoneDialog,
+  PublicadorDialog,
+  DeleteDialog,
+} from './Dialogs';
 
 const useStyles = makeStyles(theme => ({
   expand: {
@@ -28,17 +36,22 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const CardInfo = ({
+  docId,
   endereco,
   handleEditButton,
   publicadores,
+  setDeletado,
+  setEditado,
   changeHeader,
 }) => {
   const classes = useStyles();
+  const { enderecos, setEnderecos } = useContext(CardsContext);
   const [expanded, setExpanded] = useState(false);
   const [openPhone, setOpenPhone] = useState(false);
   const [openDone, setOpenDone] = useState(false);
   const [openPublicador, setOpenPublicador] = useState(false);
-  const [checkAsDone, setCheckAsDone] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
+  const [checkAsDone, setCheckAsDone] = useState(Boolean(endereco.feito));
   const [situacao, setSituacao] = useState('');
 
   const handleExpand = () => {
@@ -54,8 +67,16 @@ const CardInfo = ({
   };
 
   const handleUndoneButton = () => {
-    setCheckAsDone(false);
-    changeHeader(null, null);
+    if (!Boolean(endereco.deletado)) {
+      setCheckAsDone(false);
+      undoVisita();
+      endereco.visitas.previous
+        ? changeHeader(
+            endereco.visitas.previous.modo,
+            endereco.visitas.previous.por,
+          )
+        : changeHeader(null, null);
+    }
   };
 
   const handleDone = value => {
@@ -66,8 +87,146 @@ const CardInfo = ({
 
   const handlePublicador = publicador => {
     setOpenPublicador(!openPublicador);
+    publicador && situacao && insertVisita(situacao, publicador);
     publicador && situacao && changeHeader(situacao, publicador);
     publicador && situacao && setCheckAsDone(true);
+    publicador && situacao && setExpanded(false);
+  };
+
+  const insertVisita = (situacao, publicador) => {
+    const today = new Date();
+
+    const visitas = endereco.visitas
+      ? {
+          ...endereco.visitas,
+          latest: {
+            date: {
+              seconds: Math.floor(today.getTime() / 1000),
+              nanoseconds: 0,
+            },
+            por: publicador,
+            modo: situacao,
+          },
+          previous: endereco.visitas.latest,
+          [endereco.visitas.latest.date.seconds.toString()]: endereco.visitas
+            .latest,
+        }
+      : {
+          latest: {
+            date: {
+              seconds: Math.floor(today.getTime() / 1000),
+              nanoseconds: 0,
+            },
+            por: publicador,
+            modo: situacao,
+          },
+        };
+    //adiciona ao estado
+    const newEndereco = {
+      ...endereco,
+      visitas,
+      feito: true,
+    };
+
+    setEnderecos({ ...enderecos, [docId]: newEndereco });
+
+    firestore
+      .collection('enderecos')
+      .doc(docId)
+      .set({ visitas, feito: true }, { merge: true });
+  };
+
+  const undoVisita = () => {
+    const visitas = endereco.visitas.previous
+      ? {
+          ...endereco.visitas,
+          latest: endereco.visitas.previous,
+        }
+      : '';
+    //adiciona ao estado
+    const newEndereco = {
+      ...endereco,
+      visitas,
+      feito: false,
+    };
+
+    setEnderecos({ ...enderecos, [docId]: newEndereco });
+
+    firestore
+      .collection('enderecos')
+      .doc(docId)
+      .set({ visitas, feito: false }, { merge: true });
+  };
+
+  const handleDeleteButton = () => {
+    setOpenDelete(!openDelete);
+  };
+
+  const handleDelete = (publicador, motivo) => {
+    setOpenDelete(!openDelete);
+    publicador && motivo && doDelete(publicador, motivo);
+    publicador && motivo && setCheckAsDone(true);
+    publicador && motivo && setExpanded(false);
+  };
+
+  const doDelete = async (publicador, motivo) => {
+    try {
+      const today = new Date();
+      const newIdField = today.getTime().toString();
+
+      //Cria uma edição em lote
+      const batch = firestore.batch();
+      const enderecoRef = firestore.collection('enderecos').doc(docId);
+      const changeRef = firestore.collection('changes').doc(docId);
+
+      //Adiciona ao banco de changeLog
+      batch.set(
+        changeRef,
+        {
+          [newIdField]: {
+            previous: { ...endereco },
+            dataDeDelecao: today,
+            status: {
+              deletado: true,
+              por: publicador,
+              motivo,
+              verificado: false,
+            },
+          },
+        },
+        { merge: true },
+      );
+
+      //adiciona ao banco de dados
+      batch.set(
+        enderecoRef,
+        {
+          feito: true,
+          editado: false,
+          deletado: true,
+        },
+        { merge: true },
+      );
+
+      await batch.commit();
+
+      setDeletado(true);
+      setEditado(false);
+
+      //adiciona ao estado
+      const newEndereco = {
+        ...endereco,
+        feito: true,
+        editado: false,
+        deletado: true,
+      };
+      setEnderecos({ ...enderecos, [docId]: newEndereco });
+
+      toast.info('Endereço editado com sucesso!');
+    } catch (e) {
+      console.log(e);
+      toast.error('❌ Não foi possível editar');
+    }
   };
 
   const handleOpenMaps = () => {
@@ -97,23 +256,46 @@ const CardInfo = ({
       <CardContent>
         <Typography
           variant="h6"
-          style={{ fontSize: '1.1rem' }}
+          style={
+            checkAsDone
+              ? { fontSize: '1.1rem', color: 'gray' }
+              : { fontSize: '1.1rem' }
+          }
           aria-label="rua e número"
         >
           {endereco.calle
             ? [endereco.calle, endereco.numero].filter(Boolean).join(', ')
             : endereco.contato[0]}
         </Typography>
-        <Typography variant="body1" aria-label="referência">
+        <Typography
+          variant="body1"
+          aria-label="referência"
+          style={checkAsDone ? { color: 'gray' } : {}}
+        >
           {endereco.referencia}
         </Typography>
-        <Typography variant="body2" color="textSecondary" aria-label="bairro">
+        <Typography
+          variant="body2"
+          color="textSecondary"
+          aria-label="bairro"
+          style={checkAsDone ? { color: 'gray' } : {}}
+        >
           {endereco.barrio}
         </Typography>
-        <Typography variant="body2" color="textSecondary" aria-label="idiomas">
+        <Typography
+          variant="body2"
+          color="textSecondary"
+          aria-label="idiomas"
+          style={checkAsDone ? { color: 'gray' } : {}}
+        >
           {endereco.idioma && `Fala ${endereco.idioma.join('y ')}`}
         </Typography>
-        <Typography variant="body2" color="textSecondary" aria-label="telefone">
+        <Typography
+          variant="body2"
+          color="textSecondary"
+          aria-label="telefone"
+          style={checkAsDone ? { color: 'gray' } : {}}
+        >
           {endereco.calle && endereco.contato && `${endereco.contato[0]}`}
         </Typography>
       </CardContent>
@@ -123,7 +305,7 @@ const CardInfo = ({
             aria-label="Marcar como feito"
             onClick={handleUndoneButton}
           >
-            <CheckCircleIcon />
+            <CheckCircleIcon style={{ color: 'green' }} />
           </IconButton>
         ) : (
           <IconButton aria-label="Marcar como feito" onClick={handleDoneButton}>
@@ -136,13 +318,21 @@ const CardInfo = ({
           onClose={handlePhone}
         />
         {endereco.coordenadas && (
-          <IconButton aria-label="ver no mapa" onClick={handleOpenMaps}>
+          <IconButton
+            aria-label="ver no mapa"
+            onClick={handleOpenMaps}
+            disabled={checkAsDone}
+          >
             <MapIcon />
           </IconButton>
         )}
         {endereco.contato && (
           <>
-            <IconButton aria-label="Ligar para endereço" onClick={handlePhone}>
+            <IconButton
+              aria-label="Ligar para endereço"
+              onClick={handlePhone}
+              disabled={checkAsDone}
+            >
               <PhoneIcon />
             </IconButton>
             <PhoneDialog
@@ -199,7 +389,11 @@ const CardInfo = ({
           >
             Editar Dados
           </Button>
-          <Button aria-label="deletar endereço" color="secondary">
+          <Button
+            aria-label="deletar endereço"
+            color="secondary"
+            onClick={handleDeleteButton}
+          >
             Deletar Endereço
           </Button>
         </CardActions>
@@ -208,6 +402,11 @@ const CardInfo = ({
       <PublicadorDialog
         onClose={handlePublicador}
         open={openPublicador}
+        publicadores={publicadores}
+      />
+      <DeleteDialog
+        onClose={handleDelete}
+        open={openDelete}
         publicadores={publicadores}
       />
     </>

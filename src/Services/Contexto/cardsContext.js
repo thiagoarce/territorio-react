@@ -20,8 +20,9 @@ export const CardsProvider = ({ children }) => {
 
   useEffect(() => {
     localStorage.setItem('cartoes', JSON.stringify(cartoes));
+
     cartoes.forEach(async cartao => {
-      let data = {};
+      console.log('chamada');
       const response = await firestore
         .collection('enderecos')
         .where(
@@ -31,11 +32,10 @@ export const CardsProvider = ({ children }) => {
         )
         .get();
 
-      {
-        response.docs.forEach(item =>
-          Object.assign(data, { [item.id]: item.data() }),
-        );
-      }
+      let data = {};
+      response.docs.forEach(item =>
+        Object.assign(data, { [item.id]: item.data() }),
+      );
 
       setEnderecos(prevState => {
         return { ...prevState, ...data };

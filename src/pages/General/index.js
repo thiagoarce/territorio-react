@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { firestore } from '../../services/Firebase';
 import { AuthContext } from '../../services/Firebase/authContext';
-import { trackPromise } from 'react-promise-tracker';
 import './styles.css';
 
 const Regioes = () => {
@@ -11,21 +10,19 @@ const Regioes = () => {
   const [user] = useContext(AuthContext);
 
   useEffect(() => {
-    trackPromise(
-      firestore
-        .collection('estado')
-        .doc('regioes')
-        .get()
-        .then(response => response.data())
-        .then(response =>
-          Object.keys(response).map(regiao => ({
-            id: regiao,
-            nome: response[regiao].nome,
-            vizinhanca: response[regiao].nearby,
-          })),
-        )
-        .then(response => setRegioes(response)),
-    );
+    firestore
+      .collection('estado')
+      .doc('regioes')
+      .get()
+      .then(response => response.data())
+      .then(response =>
+        Object.keys(response).map(regiao => ({
+          id: regiao,
+          nome: response[regiao].nome,
+          vizinhanca: response[regiao].nearby,
+        })),
+      )
+      .then(response => setRegioes(response));
   }, []);
 
   const abreRegiao = regiao => {

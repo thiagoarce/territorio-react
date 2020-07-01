@@ -14,33 +14,54 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: red[500],
     fontSize: '16px',
   },
+
+  labelEdit: {
+    backgroundColor: '#3f51b5',
+    color: '#fff',
+    fontWeight: 'bold',
+    padding: '0.5em',
+    textAlign: 'right',
+  },
+  labelDelete: {
+    backgroundColor: red[500],
+    color: '#fff',
+    fontWeight: 'bold',
+    padding: '0.5em',
+    textAlign: 'right',
+  },
 }));
 const DireccionCard = ({ id, publicadores }) => {
   const { enderecos } = useContext(CardsContext);
   const endereco = enderecos[id];
   const classes = useStyles();
-  const ultimaData = new Date(endereco.visitas.latest.date.seconds * 1000);
+  const ultimaData = endereco.visitas
+    ? new Date(endereco.visitas.latest.date.seconds * 1000)
+    : '';
 
-  const headerInicial = {
-    tipo: modoVisita[endereco.visitas.latest.modo].header,
-    publicador: endereco.visitas.latest.por,
-    date: Intl.DateTimeFormat('pt-BR', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-    }).format(ultimaData),
-  };
+  const headerInicial = endereco.visitas
+    ? {
+        tipo: modoVisita[endereco.visitas.latest.modo].header,
+        publicador: endereco.visitas.latest.por,
+        date: Intl.DateTimeFormat('pt-BR', {
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric',
+        }).format(ultimaData),
+      }
+    : null;
 
   const [isEditable, setIsEditable] = useState(false);
   const [header, setHeader] = useState(headerInicial);
+  const [editado, setEditado] = useState(Boolean(endereco.editado));
+  const [deletado, setDeletado] = useState(Boolean(endereco.deletado));
 
-  const handleEditButton = () => {
+  const handleCloseEdition = () => {
     setIsEditable(!isEditable);
   };
 
   const handleHeaderChange = (situacao, publicador) => {
     if (!situacao) {
-      return setHeader(headerInicial);
+      return setHeader(null);
     }
     const today = new Date();
 
@@ -59,28 +80,38 @@ const DireccionCard = ({ id, publicadores }) => {
 
   return (
     <Card>
+      {editado && <div className={classes.labelEdit}>Edição Solicitada</div>}
+      {deletado && (
+        <div className={classes.labelDelete}>Exclusão Solicitada</div>
+      )}
       <CardHeader
         avatar={
           <Avatar aria-label="serial" className={classes.avatar}>
             {endereco.id.toString().padStart(4, '0')}
           </Avatar>
         }
-        title={`${header.tipo} por ${header.publicador}`}
-        subheader={`Em ${header.date}`}
+        title={
+          header ? `${header.tipo} por ${header.publicador}` : 'Nunca visitado'
+        }
+        subheader={header && `Em ${header.date}`}
       />
       {isEditable ? (
         <CardForm
+          docId={id}
           endereco={endereco}
-          handleEditButton={handleEditButton}
-          changeHeader={handleHeaderChange}
+          onClose={handleCloseEdition}
           publicadores={publicadores}
+          setEditado={setEditado}
         />
       ) : (
         <CardInfo
+          docId={id}
           endereco={endereco}
-          handleEditButton={handleEditButton}
+          handleEditButton={handleCloseEdition}
           changeHeader={handleHeaderChange}
           publicadores={publicadores}
+          setEditado={setEditado}
+          setDeletado={setDeletado}
         />
       )}
     </Card>

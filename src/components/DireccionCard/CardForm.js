@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
@@ -8,19 +8,24 @@ import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import FormLabel from '@material-ui/core/FormLabel';
 import { nacionalidades, idiomas } from '../../constants/formConfig';
+import { toast } from 'react-toastify';
+import { firestore, Firebase } from '../../services/Firebase';
+import { PublicadorDialog } from './Dialogs';
+import { CardsContext } from '../../services/Contexto/cardsContext';
 
 const useStyles = makeStyles(theme => ({
   input: {
     width: '100%',
-    backgroundColor: 'white',
   },
   fieldGroup: {
     padding: theme.spacing(1),
   },
 }));
 
-const CardForm = ({ endereco, handleEditButton }) => {
+const CardForm = ({ docId, endereco, onClose, publicadores, setEditado }) => {
   const classes = useStyles();
+  const [openPublicador, setOpenPublicador] = useState(false);
+  const { enderecos, setEnderecos } = useContext(CardsContext);
   const [calle, setCalle] = useState(endereco.calle ? endereco.calle : '');
   const [numero, setNumero] = useState(endereco.numero ? endereco.numero : '');
   const [referencia, setReferencia] = useState(
@@ -43,6 +48,104 @@ const CardForm = ({ endereco, handleEditButton }) => {
   );
   const [tempTelefono, setTempTelefono] = useState('');
   const [email, setEmail] = useState(endereco.email ? endereco.email : '');
+
+  const isInfoValid =
+    (calle && latitude && longitude) ||
+    (referencia && latitude && longitude) ||
+    telefono ||
+    tempTelefono ||
+    email;
+
+  const handleEditButton = () => {
+    setOpenPublicador(!openPublicador);
+  };
+
+  const handlePublicador = publicador => {
+    setOpenPublicador(!openPublicador);
+    publicador && doEdit(publicador);
+  };
+
+  const doEdit = async publicador => {
+    try {
+      // organiza informações do formulário para inserção
+      const contato =
+        tempTelefono.length > 6 ? [...telefono, tempTelefono] : telefono;
+
+      const coordenadas = latitude
+        ? new Firebase.firestore.GeoPoint(
+            parseFloat(latitude),
+            parseFloat(longitude),
+          )
+        : null;
+
+      const today = new Date();
+      const newIdField = today.getTime().toString();
+
+      //Cria uma edição em lote
+      const batch = firestore.batch();
+      const enderecoRef = firestore.collection('enderecos').doc(docId);
+      const changeRef = firestore.collection('changes').doc(docId);
+
+      //Adiciona ao banco de changeLog
+      batch.set(
+        changeRef,
+        {
+          [newIdField]: {
+            previous: { ...endereco },
+            dataDeEdicao: today,
+            status: { editado: true, por: publicador, verificado: false },
+          },
+        },
+        { merge: true },
+      );
+
+      //adiciona ao banco de dados
+      batch.set(
+        enderecoRef,
+        {
+          calle,
+          numero,
+          referencia,
+          barrio,
+          email,
+          coordenadas,
+          idioma,
+          nacionalidade,
+          contato,
+          editado: true,
+        },
+        { merge: true },
+      );
+
+      await batch.commit();
+
+      setEditado(true);
+
+      //adiciona ao estado
+      const newEndereco = {
+        ...endereco,
+        calle,
+        numero,
+        referencia,
+        barrio,
+        email,
+        coordenadas,
+        idioma,
+        nacionalidade,
+        contato,
+        editado: true,
+      };
+      setEnderecos({ ...enderecos, [docId]: newEndereco });
+
+      toast.info('Endereço editado com sucesso!');
+    } catch (e) {
+      console.log(e);
+      toast.error('❌ Não foi possível editar');
+    }
+
+    onClose();
+  };
+
   return (
     <>
       <CardContent>
@@ -112,7 +215,7 @@ const CardForm = ({ endereco, handleEditButton }) => {
           <Grid item xs={12}>
             <fieldset className={classes.fieldGroup}>
               <FormLabel component="legend">
-                Informações sobre o estrangeiro e contato
+                Dados do estrangeiro e contato
               </FormLabel>
               <Grid container spacing={3}>
                 <Grid item xs={12}>
@@ -193,20 +296,22 @@ const CardForm = ({ endereco, handleEditButton }) => {
       </CardContent>
       <CardActions>
         <Button
-          aria-label="editar localização"
+          aria-label="concluir edição"
           color="primary"
           onClick={handleEditButton}
+          disabled={!isInfoValid}
         >
           Concluir Edição
         </Button>
-        <Button
-          aria-label="deletar endereço"
-          color="secondary"
-          onClick={handleEditButton}
-        >
+        <Button aria-label="cancelar" color="secondary" onClick={onClose}>
           Cancelar
         </Button>
       </CardActions>
+      <PublicadorDialog
+        onClose={handlePublicador}
+        open={openPublicador}
+        publicadores={publicadores}
+      />
     </>
   );
 };

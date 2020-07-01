@@ -1,6 +1,5 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useContext } from 'react';
 import { AuthContext } from '../../services/Firebase/authContext';
-import { Firebase, firestore } from '../../services/Firebase';
 import DireccionCard from '../../components/DireccionCard';
 import Grid from '@material-ui/core/Grid';
 import Container from '@material-ui/core/Container';

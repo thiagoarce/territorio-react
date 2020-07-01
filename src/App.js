@@ -2,6 +2,7 @@ import React from 'react';
 import Routes from './routes';
 import { AuthProvider } from './services/Firebase/authContext';
 import { CardsProvider } from './services/Contexto/cardsContext';
+import ServiceWorkerWrapper from './components/ServiceWorkerWrapper';
 
 import Toast from './components/Toast';
 
@@ -10,12 +11,13 @@ import './global.css';
 
 const App = () => {
   return (
-    <AuthProvider>
-      <CardsProvider>
+    <CardsProvider>
+      <AuthProvider>
         <Routes />
         <Toast />
-      </CardsProvider>
-    </AuthProvider>
+        <ServiceWorkerWrapper />
+      </AuthProvider>
+    </CardsProvider>
   );
 };
 

@@ -1,4 +1,5 @@
-import React, { useEffect, useState, createContext } from 'react';
+import React, { useEffect, useState, createContext, useContext } from 'react';
+import { CardsContext } from '../../services/Contexto/cardsContext';
 import { auth } from './index';
 
 export const AuthContext = createContext();
@@ -9,6 +10,7 @@ export const AuthProvider = props => {
     : null;
   const { children } = props;
   const [user, setUser] = useState(currentUser);
+  const { setCartoes } = useContext(CardsContext);
 
   useEffect(() => {
     auth.onAuthStateChanged(authUser => {
@@ -24,6 +26,7 @@ export const AuthProvider = props => {
       } else {
         setUser(null);
         localStorage.setItem('authUser', null);
+        setCartoes([]);
       }
     });
   }, []);

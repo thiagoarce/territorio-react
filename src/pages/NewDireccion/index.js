@@ -232,7 +232,7 @@ const NewDireccion = () => {
 
         firestore.collection('changes').add({
           type: 'add',
-          rua: calle,
+          calle,
           numero,
           referencia,
           barrio,
@@ -456,7 +456,7 @@ const NewDireccion = () => {
           <Grid item xs={12}>
             <fieldset className={classes.fieldGroup}>
               <FormLabel component="legend">
-                Informações sobre o estrangeiro e contato
+                Dados do estrangeiro e contato
               </FormLabel>
               <Grid container spacing={3}>
                 <Grid item xs={12} sm={6}>

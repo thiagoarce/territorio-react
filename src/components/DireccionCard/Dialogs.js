@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import Avatar from '@material-ui/core/Avatar';
@@ -10,6 +10,13 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
 import PhoneIcon from '@material-ui/icons/Phone';
 import PersonIcon from '@material-ui/icons/Person';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
 import { blue } from '@material-ui/core/colors';
 import { modoVisita } from '../../constants/direccionConfig';
 
@@ -71,7 +78,6 @@ PhoneDialog.propTypes = {
 };
 
 export const DoneDialog = ({ onClose, open }) => {
-  const classes = useStyles();
   const situacoes = Object.entries(modoVisita).filter(situacao =>
     Boolean(situacao[1].mensagem),
   );
@@ -142,6 +148,70 @@ export const PublicadorDialog = ({ onClose, open, publicadores }) => {
           </ListItem>
         ))}
       </List>
+    </Dialog>
+  );
+};
+
+export const DeleteDialog = ({ onClose, open, publicadores }) => {
+  const [publicador, setPublicador] = useState(publicadores[0]);
+  const [motivo, setMotivo] = useState('');
+
+  const isValid = motivo && publicador;
+
+  const handleCancel = () => {
+    onClose(null);
+  };
+
+  const handleSubmit = () => {
+    onClose(publicador, motivo);
+  };
+
+  return (
+    <Dialog
+      onClose={handleCancel}
+      aria-labelledby="delete-dialog-title"
+      open={open}
+    >
+      <DialogTitle id="delete-dialog-title">Deletar Endereço</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          Selecione o publicador e diga o motivo da exclusão.
+        </DialogContentText>
+
+        <Select
+          labelId="seleciona-publicador"
+          id="seleciona-publicador"
+          value={publicador}
+          onChange={e => setPublicador(e.target.value)}
+          label="Age"
+          fullWidth
+          style={{ marginBottom: '1rem' }}
+        >
+          {publicadores.map(publicador => (
+            <MenuItem key={publicador} value={publicador}>
+              {publicador}
+            </MenuItem>
+          ))}
+        </Select>
+
+        <TextField
+          id="motivo"
+          label="Motivo"
+          multiline
+          rows={2}
+          variant="outlined"
+          onChange={e => setMotivo(e.target.value)}
+          fullWidth
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleCancel} color="primary">
+          Cancelar
+        </Button>
+        <Button onClick={handleSubmit} color="secondary" disabled={!isValid}>
+          Confirmar
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 };
