@@ -10,6 +10,7 @@ import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import { toast } from 'react-toastify';
 import { Map, TileLayer, Marker } from 'react-leaflet';
+import { trackPromise } from 'react-promise-tracker';
 
 import Autocomplete, {
   createFilterOptions,
@@ -214,14 +215,16 @@ const NewDireccion = () => {
         tempTelefono.length > 6 ? [...telefono, tempTelefono] : telefono;
 
       if (onlyContato) {
-        firestore.collection('changes').add({
-          type: 'add',
-          idioma,
-          email,
-          nacionalidade,
-          contato,
-          visitas,
-        });
+        trackPromise(
+          firestore.collection('changes').add({
+            type: 'add',
+            idioma,
+            email,
+            nacionalidade,
+            contato,
+            visitas,
+          }),
+        );
       } else {
         const coordenadas = latitude
           ? new Firebase.firestore.GeoPoint(
@@ -230,19 +233,21 @@ const NewDireccion = () => {
             )
           : null;
 
-        firestore.collection('changes').add({
-          type: 'add',
-          calle,
-          numero,
-          referencia,
-          barrio,
-          email,
-          coordenadas,
-          idioma,
-          nacionalidade,
-          contato,
-          visitas,
-        });
+        trackPromise(
+          firestore.collection('changes').add({
+            type: 'add',
+            calle,
+            numero,
+            referencia,
+            barrio,
+            email,
+            coordenadas,
+            idioma,
+            nacionalidade,
+            contato,
+            visitas,
+          }),
+        );
       }
 
       setCalle('');

@@ -1,5 +1,6 @@
 import React, { useCallback, useContext, useEffect } from 'react';
 import { AuthContext } from '../../services/Firebase/authContext';
+import { trackPromise } from 'react-promise-tracker';
 import CreateFloatingButton from '../../components/CreateFloatingButton';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
@@ -30,15 +31,16 @@ const Home = () => {
       console.log('chamou');
       const today = new Date();
       const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-
-      firestore
-        .collection('designacoes')
-        .where('emails', 'array-contains', user.email)
-        .where('designadoEm', '>', monthAgo)
-        .orderBy('designadoEm', 'desc')
-        .get()
-        .then(response => response.docs.map(doc => doc.data()))
-        .then(data => setCartoes(data));
+      trackPromise(
+        firestore
+          .collection('designacoes')
+          .where('emails', 'array-contains', user.email)
+          .where('designadoEm', '>', monthAgo)
+          .orderBy('designadoEm', 'desc')
+          .get()
+          .then(response => response.docs.map(doc => doc.data()))
+          .then(data => setCartoes(data)),
+      );
     }
   }, [cartoes, setCartoes, user]);
 
@@ -46,15 +48,16 @@ const Home = () => {
     console.log('chamada');
     const today = new Date();
     const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-
-    firestore
-      .collection('designacoes')
-      .where('emails', 'array-contains', user.email)
-      .where('designadoEm', '>', monthAgo)
-      .orderBy('designadoEm', 'desc')
-      .get()
-      .then(response => response.docs.map(doc => doc.data()))
-      .then(data => setCartoes(data));
+    trackPromise(
+      firestore
+        .collection('designacoes')
+        .where('emails', 'array-contains', user.email)
+        .where('designadoEm', '>', monthAgo)
+        .orderBy('designadoEm', 'desc')
+        .get()
+        .then(response => response.docs.map(doc => doc.data()))
+        .then(data => setCartoes(data)),
+    );
   }, [user, setCartoes]);
 
   return (

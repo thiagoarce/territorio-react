@@ -1,5 +1,6 @@
 import React, { useState, createContext, useEffect } from 'react';
 import { Firebase, firestore } from '../../services/Firebase';
+import { trackPromise } from 'react-promise-tracker';
 export const CardsContext = createContext();
 
 export const CardsProvider = ({ children }) => {
@@ -23,14 +24,17 @@ export const CardsProvider = ({ children }) => {
 
     cartoes.forEach(async cartao => {
       console.log('chamada');
-      const response = await firestore
-        .collection('enderecos')
-        .where(
-          Firebase.firestore.FieldPath.documentId(),
-          'in',
-          cartao.enderecos,
-        )
-        .get();
+
+      const response = await trackPromise(
+        firestore
+          .collection('enderecos')
+          .where(
+            Firebase.firestore.FieldPath.documentId(),
+            'in',
+            cartao.enderecos,
+          )
+          .get(),
+      );
 
       let data = {};
       response.docs.forEach(item =>

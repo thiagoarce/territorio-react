@@ -21,6 +21,7 @@ import {
   PublicadorDialog,
   DeleteDialog,
 } from './Dialogs';
+import { trackPromise } from 'react-promise-tracker';
 
 const useStyles = makeStyles(theme => ({
   expand: {
@@ -130,10 +131,12 @@ const CardInfo = ({
 
     setEnderecos({ ...enderecos, [docId]: newEndereco });
 
-    firestore
-      .collection('enderecos')
-      .doc(docId)
-      .set({ visitas, feito: true }, { merge: true });
+    trackPromise(
+      firestore
+        .collection('enderecos')
+        .doc(docId)
+        .set({ visitas, feito: true }, { merge: true }),
+    );
   };
 
   const undoVisita = () => {
@@ -152,10 +155,12 @@ const CardInfo = ({
 
     setEnderecos({ ...enderecos, [docId]: newEndereco });
 
-    firestore
-      .collection('enderecos')
-      .doc(docId)
-      .set({ visitas, feito: false }, { merge: true });
+    trackPromise(
+      firestore
+        .collection('enderecos')
+        .doc(docId)
+        .set({ visitas, feito: false }, { merge: true }),
+    );
   };
 
   const handleDeleteButton = () => {
@@ -208,7 +213,7 @@ const CardInfo = ({
         { merge: true },
       );
 
-      await batch.commit();
+      await trackPromise(batch.commit());
 
       setDeletado(true);
       setEditado(false);

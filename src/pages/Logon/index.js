@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import { erros } from '../../constants/erros';
 import { FiLogIn } from 'react-icons/fi';
 import { auth } from '../../services/Firebase';
-
+import { trackPromise } from 'react-promise-tracker';
 const Logon = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -17,7 +17,7 @@ const Logon = () => {
       e.preventDefault();
 
       try {
-        await auth.signInWithEmailAndPassword(email, password);
+        await trackPromise(auth.signInWithEmailAndPassword(email, password));
         history.push('/');
       } catch (error) {
         if (erros[error.code]) {

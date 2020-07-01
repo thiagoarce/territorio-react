@@ -29,7 +29,7 @@ export const AuthProvider = props => {
         setCartoes([]);
       }
     });
-  }, []);
+  }, [setCartoes]);
 
   return (
     <AuthContext.Provider value={[user, setUser]}>

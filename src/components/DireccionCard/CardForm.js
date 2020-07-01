@@ -12,6 +12,7 @@ import { toast } from 'react-toastify';
 import { firestore, Firebase } from '../../services/Firebase';
 import { PublicadorDialog } from './Dialogs';
 import { CardsContext } from '../../services/Contexto/cardsContext';
+import { trackPromise } from 'react-promise-tracker';
 
 const useStyles = makeStyles(theme => ({
   input: {
@@ -117,7 +118,7 @@ const CardForm = ({ docId, endereco, onClose, publicadores, setEditado }) => {
         { merge: true },
       );
 
-      await batch.commit();
+      await trackPromise(batch.commit());
 
       setEditado(true);
 
